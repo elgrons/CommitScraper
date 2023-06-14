@@ -1,4 +1,11 @@
 using Octokit;
+using System;
+using Octokit.Webhooks.AspNetCore;
+using Octokit.Webhooks.AzureFunctions;
+using System.Text;
+using Octokit.Webhooks;
+using Microsoft.AspNetCore.Builder;
+using CommitScraper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +16,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton<WebhookEventProcessor, MyWebhookEventProcessor>();
+
 var app = builder.Build();
+
+app.UseHttpsRedirection();
+    
+app.UseRouting();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -17,8 +30,29 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapGitHubWebhooks();
+});
 
-app.UseHttpsRedirection();
+
+app.Map("/api/webhook", app =>
+{
+    app.Run(async context =>
+    {
+        // Handle the webhook request here
+        // You can access the payload using context.Request.Body stream or model binding
+
+        // Example:
+        var payload = await context.Request.BodyReader.ReadAsync();
+        var payloadString = Encoding.UTF8.GetString(payload.Buffer);
+        Console.WriteLine(payloadString);
+
+        // Respond with a 200 OK status code
+        context.Response.StatusCode = 200;
+        await context.Response.CompleteAsync();
+    });
+});
 
 app.UseAuthorization();
 

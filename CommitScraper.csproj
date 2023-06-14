@@ -9,9 +9,16 @@
   <ItemGroup>
     <PackageReference Include="dotenv.net" Version="3.1.2" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Cors" Version="5.2.9" />
+    <PackageReference Include="Microsoft.AspNet.WebHooks.Common" Version="1.2.2" />
+    <PackageReference Include="Microsoft.AspNet.WebHooks.Receivers.GitHub" Version="1.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.WebHooks.Receivers" Version="1.0.0-preview2-final" />
     <PackageReference Include="newtonsoft.json" Version="13.0.3" />
     <PackageReference Include="octokit" Version="6.0.0" />
+    <PackageReference Include="Octokit.Reactive" Version="6.0.0" />
+    <PackageReference Include="Octokit.Webhooks.AspNetCore" Versionf="2.0.1" />
+    <PackageReference Include="Octokit.Webhooks.AzureFunctions" Version="2.0.1" />
+    <PackageReference Include="Smee.IO.Client" Version="1.0.16" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
