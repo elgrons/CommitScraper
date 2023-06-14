@@ -1,0 +1,5 @@
+obj
+bin
+.env
+appsettings.json
+serviceaccountkey.json
