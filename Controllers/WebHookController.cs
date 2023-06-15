@@ -1,11 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using CommitScraper.Models;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Octokit;
-using Microsoft.Extensions.Configuration;
 
 namespace CommitScraper.Controllers;
 
@@ -15,7 +10,8 @@ public class WebHookController : ControllerBase
 {
   private readonly MyWebhookEventProcessor _processor;
   private readonly GitHubClient _gitHubClient;
-  public WebHookController(MyWebhookEventProcessor processor, GitHubClient gitHubClient, IConfiguration configuration)
+  private readonly ILogger<WebHookController> _logger;
+  public WebHookController(MyWebhookEventProcessor processor, GitHubClient gitHubClient, IConfiguration configuration, ILogger<WebHookController> logger)
   {
     string appId = configuration["APP_ID"];
     string webhookSecret = configuration["WEBHOOK_SECRET"];
@@ -26,15 +22,14 @@ public class WebHookController : ControllerBase
 
     _gitHubClient = new GitHubClient(new ProductHeaderValue("CommitScraper"))
     {
-      Credentials = new Credentials("gitHubToken")
+      Credentials = new Credentials(gitHubToken)
     };
+    _logger = logger;
   }
 
-  [HttpGet]
-  public async Task<IActionResult> Get([FromBody] PayloadModel payload)
+  [HttpPost]
+  public async Task<IActionResult> ProcessCommit([FromBody] PayloadModel payload)
   {
-
-    
     foreach (var commit in payload.Commits)
     {
       var commitSHA = commit.Id;
@@ -43,9 +38,8 @@ public class WebHookController : ControllerBase
       var commitMessage = commitDetails.Commit.Message;
       var committer = commitDetails.Commit.Committer;
 
-      // REWRITE THIS TO SEND OFF INSTEAD OF COMMAND LINE...
-      System.Console.WriteLine($"Committer: {committer.Name}");
-      System.Console.WriteLine($"Commit message: {commitMessage}");
+      _logger.LogInformation($"Committer: {committer.Name}");
+      _logger.LogInformation($"Commit message: {commitMessage}");
     }
     return Ok();
   }
