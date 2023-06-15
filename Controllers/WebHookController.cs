@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using CommitScraper.Models;
 using Octokit;
+using DotNetEnv;
 
 namespace CommitScraper.Controllers;
 
@@ -11,18 +12,19 @@ public class WebHookController : ControllerBase
   private readonly MyWebhookEventProcessor _processor;
   private readonly GitHubClient _gitHubClient;
   private readonly ILogger<WebHookController> _logger;
-  public WebHookController(MyWebhookEventProcessor processor, GitHubClient gitHubClient, IConfiguration configuration, ILogger<WebHookController> logger)
+  public WebHookController(MyWebhookEventProcessor processor, IConfiguration configuration, ILogger<WebHookController> logger)
   {
-    string appId = configuration["APP_ID"];
-    // string webhookSecret = configuration["WEBHOOK_SECRET"];
-    string privateKeyPath = configuration["PRIVATE_KEY_PATH"];
-    var gitHubToken = configuration["GITHUB_TOKEN"];
+    // GitHubClient gitHubClient
+    string appId = Environment.GetEnvironmentVariable("APP_ID");
+    string webhookSecret = Environment.GetEnvironmentVariable("WEBHOOK_SECRET");
+    string privateKeyPath = Environment.GetEnvironmentVariable("PRIVATE_KEY_PATH");
+    var gitHubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
 
     _processor = processor;
 
     _gitHubClient = new GitHubClient(new ProductHeaderValue("CommitScraper"))
     {
-      Credentials = new Credentials(privateKeyPath)
+      Credentials = new Credentials(gitHubToken)
     };
     _logger = logger;
   }
@@ -30,18 +32,25 @@ public class WebHookController : ControllerBase
   [HttpPost]
   public async Task<IActionResult> ProcessCommit([FromBody] PayloadModel payload)
   {
-    foreach (var commit in payload.Commits)
+    if (payload != null)
     {
-      var commitSHA = commit.Id;
-      var commitDetails = await _gitHubClient.Repository.Commit.Get(payload.Repository.Owner.Login, payload.Repository.Name, commitSHA);
+      foreach (var commit in payload.Commits)
+      {
+        var commitSHA = commit.Id;
+        var commitDetails = await _gitHubClient.Repository.Commit.Get(payload.Repository.Owner.Login, payload.Repository.Name, commitSHA);
 
-      var commitMessage = commitDetails.Commit.Message;
-      var committer = commitDetails.Commit.Committer;
+        var commitMessage = commitDetails.Commit.Message;
+        var committer = commitDetails.Commit.Committer;
 
-      _logger.LogInformation($"Committer: {committer.Name}");
-      _logger.LogInformation($"Commit message: {commitMessage}");
+        _logger.LogInformation($"Committer: {committer.Name}");
+        _logger.LogInformation($"Commit message: {commitMessage}");
+      }
+      return Ok();
     }
-    return Ok();
+    else
+    {
+      return NotFound();
+    }
   }
 }
 
