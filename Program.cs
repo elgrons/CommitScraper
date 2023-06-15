@@ -3,9 +3,10 @@ using System;
 using Octokit.Webhooks.AspNetCore;
 using Octokit.Webhooks.AzureFunctions;
 using System.Text;
-using Octokit.Webhooks;
-using Microsoft.AspNetCore.Builder;
+using DotNetEnv;
 using CommitScraper;
+
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,19 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<WebhookEventProcessor, MyWebhookEventProcessor>();
+builder.Services.AddSingleton<MyWebhookEventProcessor, MyWebhookEventProcessor>();
+
+builder.Services.AddSingleton<GitHubClient>(serviceProvider =>
+{
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    var gitHubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+    
+    return new GitHubClient(new ProductHeaderValue("CommitScraper"))
+    {
+        Credentials = new Credentials(gitHubToken)
+    };
+});
+
 
 var app = builder.Build();
 

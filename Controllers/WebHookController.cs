@@ -14,7 +14,7 @@ public class WebHookController : ControllerBase
   public WebHookController(MyWebhookEventProcessor processor, GitHubClient gitHubClient, IConfiguration configuration, ILogger<WebHookController> logger)
   {
     string appId = configuration["APP_ID"];
-    string webhookSecret = configuration["WEBHOOK_SECRET"];
+    // string webhookSecret = configuration["WEBHOOK_SECRET"];
     string privateKeyPath = configuration["PRIVATE_KEY_PATH"];
     var gitHubToken = configuration["GITHUB_TOKEN"];
 
@@ -22,7 +22,7 @@ public class WebHookController : ControllerBase
 
     _gitHubClient = new GitHubClient(new ProductHeaderValue("CommitScraper"))
     {
-      Credentials = new Credentials(gitHubToken)
+      Credentials = new Credentials(privateKeyPath)
     };
     _logger = logger;
   }
