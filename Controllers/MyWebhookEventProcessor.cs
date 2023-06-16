@@ -1,11 +1,10 @@
-namespace CommitScraper;
-
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Octokit.Webhooks;
 using Octokit.Webhooks.Events;
 
-public class MyWebhookEventProcessor : WebhookEventProcessor
+namespace CommitScraper;
+public sealed class MyWebhookEventProcessor : WebhookEventProcessor
 {
     private readonly ILogger<MyWebhookEventProcessor> logger;
 
