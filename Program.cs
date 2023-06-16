@@ -32,7 +32,6 @@ builder.Services.AddSingleton<GitHubClient>(serviceProvider =>
 
 builder.Services.AddMvc();
 builder.Services.AddOptions();
-builder.Services.Configure<TokenOptions>(Configuration);
 
 
 var app = builder.Build();
@@ -47,6 +46,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.MapControllers();
+
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapGitHubWebhooks();
@@ -72,7 +73,5 @@ app.Map("/api/webhook", app =>
 });
 
 app.UseAuthorization();
-
-app.MapControllers();
 
 app.Run();
