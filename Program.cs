@@ -30,6 +30,10 @@ builder.Services.AddSingleton<GitHubClient>(serviceProvider =>
     };
 });
 
+builder.Services.AddMvc();
+builder.Services.AddOptions();
+builder.Services.Configure<TokenOptions>(Configuration);
+
 
 var app = builder.Build();
 
